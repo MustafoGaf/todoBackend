@@ -3,7 +3,7 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import Todos, Users
@@ -22,7 +22,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         # Add custom claims
         token['username'] = user.username
-
+        token['isAdmin'] = user.is_staff
         # ...
 
         return token
@@ -90,7 +90,7 @@ def users_list(request):
     
 @api_view(['GET', 'PUT', 'DELETE'])
 @permission_classes([IsAuthenticated])
-def todos_detail(request, pk):
+def todos_list(request, pk):
     """
  Retrieve, update or delete a customer by id/pk.
  """
@@ -134,4 +134,70 @@ def forgotURL(request):
                 return Response(serializer.errors, status=status.HTTP_409_CONFLICT)
         # user = User.objects.create_user(username=serializer.data.username, password=serializer.data.password1)
         # user.save()
-       
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])       
+def info_user(request):
+    req_user = request.user
+    users = User.objects.get(id = req_user.id)
+    print(">>>>>", req_user , users.is_staff)
+    serializer = CurrentUsersSerializer(users)
+    return Response({'data': serializer.data })
+    
+
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def all_todo_list(request):
+    """
+ List  customers, or create a new customer.
+ """
+    if request.method == 'GET':
+        data = []
+        nextPage = 1
+        previousPage = 1
+        
+        
+        todos = Todos.objects.all()
+        users = Users.objects.all()
+        page = request.GET.get('page', 1)
+        paginator = Paginator(todos, 5)
+        try:
+            data = paginator.page(page)
+        except PageNotAnInteger:
+            data = paginator.page(1)
+        except EmptyPage:
+            data = paginator.page(paginator.num_pages)
+
+        serializer = TodosSerializer(data,context={'request': request} ,many=True)
+        if data.has_next():
+            nextPage = data.next_page_number()
+        if data.has_previous():
+            previousPage = data.previous_page_number()
+
+        return Response({'data': serializer.data , 'count': paginator.count, 'numpages' : paginator.num_pages, 'nextlink': '/api/todos/?page=' + str(nextPage), 'prevlink': '/api/todos/?page=' + str(previousPage)})
+
+    elif request.method == 'POST':
+        print()
+        serializer = TodosSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+@api_view(['GET'])
+@permission_classes([IsAdminUser])
+def all_users_list(request):
+    """
+ List  customers, or create a new customer.
+ """
+    if request.method == 'GET':
+        data = []
+        
+        
+        users = User.objects.all()
+        
+        print(">>>>>>>>",users)
+        
+        serializer = AllUsersSerializer(users,context={'request': request} ,many=True)
+        return Response({'data': serializer.data })
+
+    

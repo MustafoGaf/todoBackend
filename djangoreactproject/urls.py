@@ -16,8 +16,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.contrib.auth import views as auth_views
-from django.urls import path, re_path
+from django.urls import path, re_path, include
 from todo import views
+from django.conf.urls.static import static
+from django.conf import settings
 from django.contrib.auth.views import PasswordChangeDoneView, PasswordChangeView, PasswordContextMixin, PasswordResetCompleteView, PasswordResetConfirmView, PasswordResetDoneView, PasswordResetView
 
 from rest_framework_simplejwt.views import (
@@ -29,8 +31,13 @@ from rest_framework_simplejwt.views import (
 urlpatterns = [
     path('admin/', admin.site.urls),
     re_path(r'^api/todos/$', views.todo_list),
+    re_path(r'^auth/me/$', views.info_user),
+    
+    re_path('^api/admin/todos/$', views.all_todo_list),
+    re_path('^api/admin/users/$', views.all_users_list),
+    
     re_path(r'^api/users/$', views.users_list),
-	re_path(r'^api/todos/(?P<pk>[0-9]+)$', views.todos_detail),
+	re_path(r'^api/todos/(?P<pk>[0-9]+)$', views.todos_list),
     path('api/token/', views.MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/forgot/', views.forgotURL), 
@@ -38,8 +45,10 @@ urlpatterns = [
     path("password-reset/done/", auth_views.PasswordResetDoneView.as_view()), 
     path("password-reset/complete/", auth_views.PasswordResetCompleteView.as_view()), 
      
-    path("password-reset/<uidb64>/<token>/",  auth_views.PasswordResetConfirmView.as_view())
+    path("password-reset/<uidb64>/<token>/",  auth_views.PasswordResetConfirmView.as_view()),
+    path('house/', include('house.urls')),
     
     # path('password-reset/<str:encoded_pk>/<str:token>/'name="jhkjhjk")
  
 ]
+urlpatterns+=static(settings.MEDIA_URL, document_root = settings.MEDIA_ROOT)

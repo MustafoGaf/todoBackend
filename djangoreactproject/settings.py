@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'todo',
+    'house',
     'rest_framework_simplejwt.token_blacklist'
 ]
 
@@ -84,7 +85,7 @@ WSGI_APPLICATION = 'djangoreactproject.wsgi.application'
 DATABASES = {
         "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": "todo",
+        "NAME": "projects",
         "USER": "postgres",
         "PASSWORD": "Salom+2003",
         "HOST": "127.0.0.1",
@@ -97,9 +98,10 @@ DATABASES = {
 
 CORS_ORIGIN_ALLOW_ALL = True
 
-CORS_ORIGIN_WHITELIST = (
-       'http://localhost:5173',
-       )
+CORS_ORIGIN_WHITELIST = [
+       
+       'http://test-handyhost.ru'
+       ]
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -182,9 +184,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

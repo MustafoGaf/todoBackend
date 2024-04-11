@@ -1,6 +1,6 @@
 from rest_framework import serializers
-from .models import Users, Todos, Password
-
+from .models import Users, Todos, Password, AllUsers
+from django.contrib.auth.models import User
 # class UsersSerializer(serializers.ModelSerializer):
     
 #     class Meta:
@@ -19,7 +19,19 @@ class UsersSerializer(serializers.ModelSerializer):
         model = Users
         fields = '__all__'
         
+class AllUsersSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = AllUsers
+        fields = '__all__'
         
+class CurrentUsersSerializer(serializers.ModelSerializer):
+    
+    class Meta:
+        model = User
+        fields = ('is_staff', 'username')
+        
+     
 class PasswordSerializer(serializers.ModelSerializer):
     class Meta:
         model = Password
